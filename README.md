@@ -1,177 +1,283 @@
-<h1 align="center">
-  <br>
-  <a href="https://www.overleaf.com"><img src="doc/logo.png" alt="Overleaf" width="300"></a>
-</h1>
+# Leafcustom - Overleaf Community Edition Personalizado
 
-<h4 align="center">An open-source online real-time collaborative LaTeX editor.</h4>
+Configuración personalizada de [Overleaf Community Edition](https://github.com/overleaf/overleaf) para implementación local con Docker. Este repositorio incluye scripts de automatización para facilitar la instalación y gestión en Ubuntu Server.
 
-<p align="center">
-  <a href="https://github.com/overleaf/overleaf/wiki">Wiki</a> •
-  <a href="https://www.overleaf.com/for/enterprises">Server Pro</a> •
-  <a href="#contributing">Contributing</a> •
-  <a href="https://mailchi.mp/overleaf.com/community-edition-and-server-pro">Mailing List</a> •
-  <a href="#authors">Authors</a> •
-  <a href="#license">License</a>
-</p>
+## 📋 Descripción
 
-<img src="doc/screenshot.png" alt="A screenshot of a project being edited in Overleaf Community Edition">
-<p align="center">
-  Figure 1: A screenshot of a project being edited in Overleaf Community Edition.
-</p>
-
-## Community Edition
-
-[Overleaf](https://www.overleaf.com) is an open-source online real-time collaborative LaTeX editor. We run a hosted version at [www.overleaf.com](https://www.overleaf.com), but you can also run your own local version, and contribute to the development of Overleaf.
+Overleaf es un editor LaTeX colaborativo en tiempo real de código abierto. Esta versión personalizada (Leafcustom) está optimizada para:
+- Instalación rápida en Ubuntu/Debian
+- Scripts de gestión automatizados
+- Configuración lista para entornos locales/privados
+- Gestión simplificada de usuarios
 
 > [!CAUTION]
-> Overleaf Community Edition is intended for use in environments where **all** users are trusted. Community Edition is **not** appropriate for scenarios where isolation of users is required due to Sandbox Compiles not being available. When not using Sandboxed Compiles, users have full read and write access to the `sharelatex` container resources (filesystem, network, environment variables) when running LaTeX compiles.
+> **Importante:** Overleaf Community Edition está diseñado para entornos donde **todos** los usuarios son de confianza. NO es apropiado para escenarios que requieren aislamiento de usuarios, ya que no incluye compilación sandbox. Los usuarios tienen acceso completo a los recursos del contenedor `sharelatex` durante las compilaciones LaTeX.
 
-For more information on Sandbox Compiles check out our [documentation](https://docs.overleaf.com/on-premises/configuration/overleaf-toolkit/server-pro-only-configuration/sandboxed-compiles).
+## 🚀 Instalación Rápida en Ubuntu Server
 
-## Enterprise
+### Requisitos Previos
+- Ubuntu/Debian Server
+- Cuenta con privilegios `sudo`
+- Conexión a Internet
 
-If you want help installing and maintaining Overleaf in your lab or workplace, we offer an officially supported version called [Overleaf Server Pro](https://www.overleaf.com/for/enterprises). It also includes more features for security (SSO with LDAP or SAML), administration and collaboration (e.g. tracked changes). [Find out more!](https://www.overleaf.com/for/enterprises)
+### Instalación Automatizada
 
-## Keeping up to date
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/hectornav/leafcustom.git
+cd leafcustom
 
-Sign up to the [mailing list](https://mailchi.mp/overleaf.com/community-edition-and-server-pro) to get updates on Overleaf releases and development.
+# 2. Ejecutar bootstrap (instala Docker y dependencias)
+sudo ./scripts/bootstrap.sh
 
-## Installation
+# 3. Iniciar los servicios
+./scripts/start.sh
 
-We have detailed installation instructions in the [Overleaf Toolkit](https://github.com/overleaf/toolkit/).
+# 4. Inicializar MongoDB (si es necesario)
+./scripts/init_mongo_replicaset.sh
 
-## Upgrading
+# 5. Crear usuario administrador
+./scripts/create_admin_user.sh --email=admin@ejemplo.com --admin
 
-If you are upgrading from a previous version of Overleaf, please see the [Release Notes section on the Wiki](https://github.com/overleaf/overleaf/wiki#release-notes) for all of the versions between your current version and the version you are upgrading to.
+# 6. Verificar estado
+./scripts/check_health.sh
+```
 
-## Overleaf Docker Image
+La aplicación estará disponible en `http://localhost` o `http://<IP-DEL-SERVIDOR>`
 
-This repo contains two dockerfiles, [`Dockerfile-base`](server-ce/Dockerfile-base), which builds the
-`sharelatex/sharelatex-base` image, and [`Dockerfile`](server-ce/Dockerfile) which builds the
-`sharelatex/sharelatex` (or "community") image.
+## 👥 Gestión de Usuarios
 
-The Base image generally contains the basic dependencies like `wget`, plus `texlive`.
-We split this out because it's a pretty heavy set of
-dependencies, and it's nice to not have to rebuild all of that every time.
+### ⚠️ Importante sobre Registro de Usuarios
 
-The `sharelatex/sharelatex` image extends the base image and adds the actual Overleaf code
-and services.
+**Overleaf Community Edition NO permite registro público por defecto** por razones de seguridad. Los usuarios deben ser creados manualmente por el administrador del servidor.
 
-Use `make build-base` and `make build-community` from `server-ce/` to build these images.
+### Crear Usuario Administrador
 
-We use the [Phusion base-image](https://github.com/phusion/baseimage-docker)
-(which is extended by our `base` image) to provide us with a VM-like container
-in which to run the Overleaf services. Baseimage uses the `runit` service
-manager to manage services, and we add our init-scripts from the `server-ce/runit`
-folder.
+```bash
+./scripts/create_admin_user.sh --email=admin@ejemplo.com --admin
+```
 
+### Crear Usuario Normal
 
-## Contributing
+```bash
+./create_overleaf_user.sh --email=usuario@ejemplo.com
+```
 
-Please see the [CONTRIBUTING](CONTRIBUTING.md) file for information on contributing to the development of Overleaf.
+### Crear Usuario con Contenedor Específico
 
-## Authors
+```bash
+./create_overleaf_user.sh --email=usuario@ejemplo.com --admin --container=leafcustom-sharelatex-1
+```
 
-[The Overleaf Team](https://www.overleaf.com/about)
+### Método Manual (Avanzado)
 
-## License
+```bash
+# Acceder al contenedor web
+docker exec -it leafcustom-sharelatex-1 /bin/bash
 
-The code in this repository is released under the GNU AFFERO GENERAL PUBLIC LICENSE, version 3. A copy can be found in the [`LICENSE`](LICENSE) file.
+# Crear usuario desde dentro del contenedor
+node services/web/modules/server-ce-scripts/scripts/create-user.js --email=usuario@ejemplo.com --admin
+```
+
+## 🛠️ Scripts Disponibles
+
+El directorio `scripts/` contiene herramientas de gestión:
+
+| Script | Descripción |
+|--------|-------------|
+| `bootstrap.sh` | Instala Docker, Docker Compose y prepara el sistema |
+| `start.sh` | Inicia todos los servicios con Docker Compose |
+| `stop.sh` | Detiene todos los servicios |
+| `start_and_show.sh` | Inicia servicios y muestra logs en tiempo real |
+| `init_mongo_replicaset.sh` | Inicializa el replicaset de MongoDB |
+| `create_admin_user.sh` | Crea un usuario administrador |
+| `check_health.sh` | Verifica el estado de los contenedores |
+| `kill_server.sh` | Fuerza el cierre de todos los servicios |
+
+## 🐳 Gestión con Docker Compose
+
+### Comandos Básicos
+
+```bash
+# Iniciar servicios en segundo plano
+docker compose up -d
+
+# Ver estado de contenedores
+docker ps
+
+# Ver logs en tiempo real
+docker compose logs -f
+
+# Ver logs de un servicio específico
+docker logs -f leafcustom-sharelatex-1
+
+# Detener servicios
+docker compose down
+
+# Reiniciar un servicio
+docker compose restart sharelatex
+
+# Reconstruir e iniciar
+docker compose up -d --build
+```
+
+## 🔧 Configuración
+
+### Variables de Entorno Importantes
+
+Edita `docker-compose.yml` para configurar:
+
+```yaml
+environment:
+  # URL del sitio
+  SHARELATEX_SITE_URL: 'http://tu-servidor.com'
+  
+  # Configuración SMTP (para emails)
+  SHARELATEX_EMAIL_FROM_ADDRESS: 'noreply@ejemplo.com'
+  SHARELATEX_EMAIL_SMTP_HOST: 'smtp.gmail.com'
+  SHARELATEX_EMAIL_SMTP_PORT: 587
+  SHARELATEX_EMAIL_SMTP_USER: 'tu-email@gmail.com'
+  SHARELATEX_EMAIL_SMTP_PASS: 'tu-contraseña'
+  
+  # Permitir registro público (NO RECOMENDADO)
+  # SHARELATEX_ALLOW_PUBLIC_ACCESS: 'true'
+```
+
+### MongoDB Replicaset
+
+Overleaf requiere MongoDB configurado como replicaset. Si ves errores de conexión:
+
+```bash
+# Inicializar manualmente
+docker exec -it leafcustom-mongo-1 mongosh --eval 'rs.initiate({_id: "overleaf", members: [{ _id: 0, host: "localhost:27017" }]})'
+
+# O usar el script incluido
+./scripts/init_mongo_replicaset.sh
+```
+
+## 🔒 Seguridad
+
+### Recomendaciones para Producción
+
+1. **NO exponer directamente a Internet** sin protección adicional
+2. **Configurar HTTPS** con un proxy inverso (nginx, Caddy, Traefik)
+3. **Configurar firewall** para limitar acceso
+4. **Cambiar credenciales por defecto** de MongoDB y Redis
+5. **Realizar backups regulares** de datos
+6. **Mantener Docker actualizado**
+7. **Considerar Overleaf Server Pro** para sandboxing y SSO
+
+### Configurar HTTPS (Recomendado)
+
+Usar Caddy como proxy inverso:
+
+```bash
+# Instalar Caddy
+sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | sudo gpg --dearmor -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg
+curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/debian.deb.txt' | sudo tee /etc/apt/sources.list.d/caddy-stable.list
+sudo apt update && sudo apt install caddy
+
+# Configurar Caddyfile
+sudo nano /etc/caddy/Caddyfile
+```
+
+```
+tu-dominio.com {
+    reverse_proxy localhost:80
+}
+```
+
+```bash
+sudo systemctl reload caddy
+```
+
+## 📁 Estructura del Repositorio
+
+```
+leafcustom/
+├── docker-compose.yml          # Configuración de servicios Docker
+├── create_overleaf_user.sh     # Script para crear usuarios
+├── SETUP.md                    # Guía detallada de configuración
+├── scripts/                    # Scripts de automatización
+│   ├── bootstrap.sh
+│   ├── start.sh
+│   ├── stop.sh
+│   ├── create_admin_user.sh
+│   └── ...
+├── services/                   # Código de los servicios Overleaf
+├── libraries/                  # Librerías compartidas
+└── server-ce/                  # Configuración del servidor CE
+```
+
+## 🔍 Solución de Problemas
+
+### El servicio no inicia
+
+```bash
+# Ver logs detallados
+docker compose logs -f
+
+# Verificar estado de contenedores
+docker ps -a
+
+# Reiniciar servicios
+docker compose restart
+```
+
+### Error de conexión a MongoDB
+
+```bash
+# Verificar que MongoDB esté corriendo
+docker ps | grep mongo
+
+# Inicializar replicaset
+./scripts/init_mongo_replicaset.sh
+```
+
+### No puedo acceder a la interfaz web
+
+```bash
+# Verificar que el puerto 80 esté abierto
+sudo netstat -tulpn | grep :80
+
+# Verificar configuración de firewall
+sudo ufw status
+
+# Si es necesario, abrir puerto
+sudo ufw allow 80/tcp
+```
+
+### Los usuarios no pueden compilar
+
+```bash
+# Verificar que Docker socket esté montado
+docker inspect leafcustom-sharelatex-1 | grep docker.sock
+
+# Reiniciar el servicio sharelatex
+docker compose restart sharelatex
+```
+
+## 📚 Documentación Adicional
+
+- [Documentación oficial de Overleaf](https://github.com/overleaf/overleaf/wiki)
+- [Overleaf Toolkit](https://github.com/overleaf/toolkit/)
+- [Guía de configuración detallada](SETUP.md)
+
+## 🤝 Contribuir
+
+Este proyecto es una personalización de Overleaf Community Edition. Para contribuciones al proyecto original, visita el [repositorio oficial de Overleaf](https://github.com/overleaf/overleaf).
+
+## 📄 Licencia
+
+Este código se distribuye bajo la licencia GNU AFFERO GENERAL PUBLIC LICENSE, versión 3. Consulta el archivo [LICENSE](LICENSE) para más detalles.
 
 Copyright (c) Overleaf, 2014-2025.
 
-**Guía local (específica para este repo)**
-
-- **Levantar los servicios (Docker / Docker Compose):**
-
-  - Desde la raíz del repositorio corra:
-
-    ```bash
-    docker compose up -d
-    ```
-
-    Esto creará/arrancará los contenedores definidos (mongo, redis, sharelatex, etc.). Si en su entorno usa `docker-compose` en lugar del plugin `docker compose`, sustituya el comando por `docker-compose up -d`.
-
-- **¿Qué es Docker Compose?**
-
-  - `docker compose` (o `docker-compose`) es una herramienta que orquesta múltiples contenedores Docker descritos en un archivo `docker-compose.yml`. Permite declarar servicios, volúmenes, redes y variables de entorno para ejecutar pilas completas con un único comando.
-
-- **Comprobar estado:**
-
-  - Ver contenedores en ejecución:
-
-    ```bash
-    docker ps
-    ```
-
-  - Ver logs del servicio web (sharelatex):
-
-    ```bash
-    docker logs -f <nombre_contenedor>
-    ```
-
-- **Parar / matar procesos:**
-
-  - Parar la pila gestionada por Compose:
-
-    ```bash
-    docker compose down
-    ```
-
-  - Parar un contenedor individualmente:
-
-    ```bash
-    docker stop <nombre_contenedor>
-    docker rm <nombre_contenedor>   # eliminar si desea recrearlo
-    ```
-
-- **Cómo añadir usuarios (desde el servidor Overleaf):**
-
-  - Este repositorio incluye un script dentro del servicio web para crear usuarios. Puede ejecutarlo desde dentro del contenedor web o usar el helper `create_overleaf_user.sh` incluido en la raíz del repositorio.
-
-  - Uso recomendado (desde el host):
-
-    ```bash
-    ./create_overleaf_user.sh --email=usuario@ejemplo.com [--admin] [--container=CONTAINER_NAME]
-    ```
-
-    - `--admin` marca al usuario como administrador.
-    - `--container` fuerza el nombre del contenedor donde está ejecutándose la app web (si no se indica, el script intentará detectarlo automáticamente).
-
-  - El script invoca internamente el script oficial `services/web/modules/server-ce-scripts/scripts/create-user.*` dentro del contenedor, que creará el usuario en la base de datos y devolverá una URL para establecer la contraseña.
-
-- **Añadir usuario manualmente (alternativa):**
-
-  - Acceda al contenedor web y ejecute el script Node directamente:
-
-    ```bash
-    # obtener un shell en el contenedor (reemplazar <container>)
-    docker exec -it <container> /bin/bash
-
-    # desde el shell del contenedor
-    node services/web/modules/server-ce-scripts/scripts/create-user.js --email=usuario@ejemplo.com --admin
-    ```
-
-- **Acceder a la interfaz web:**
-
-  - Si ejecutó `docker compose` en la misma máquina, abra `http://localhost` o `http://<IP_DEL_SERVIDOR>` en un navegador.
-
-- **Notas importantes sobre MongoDB y replicaset:**
-
-  - Overleaf espera que MongoDB esté configurado como replicaset (aunque sea de una sola instancia). Si Mongo no fue inicializado como replicaset, la aplicación mostrará errores de conexión. Para inicializar manualmente:
-
-    ```bash
-    docker exec -it <mongo_container> mongosh --eval 'rs.initiate({_id: "overleaf", members: [{ _id: 0, host: "localhost:27017" }]})'
-    ```
-
-  Nota rápida: este repositorio monta automáticamente `/var/run/docker.sock` en el servicio `sharelatex` (docker-compose.yml) para que el subsistema de compilación (CLSI) pueda ejecutar contenedores de compilado. Si después de actualizar compose ve errores de compilación, reinicie la pila con `./scripts/start_and_show.sh`.
-
-- **Seguridad y advertencias:**
-
-  - Overleaf Community Edition no proporciona compilación sandbox por defecto en esta configuración; NO exponga este servidor a Internet sin medidas adicionales (firewall, HTTPS, autenticación SSO, sandboxing de compilados).
-
-  - Antes de exponer servicios al resto de la red, configure `SITE_URL`, SMTP y credenciales admin en el archivo de entorno/`docker-compose.yml` según la documentación oficial.
-
 ---
 
-Archivo helper para crear usuarios: [create_overleaf_user.sh](create_overleaf_user.sh)
+## 💡 Notas Finales
+
+- **Este repositorio NO es el oficial de Overleaf**, es una versión personalizada con scripts de automatización
+- Para soporte empresarial y características avanzadas (SSO, sandboxing), considera [Overleaf Server Pro](https://www.overleaf.com/for/enterprises)
+- Mantén tu instalación actualizada revisando el [repositorio oficial](https://github.com/overleaf/overleaf)
