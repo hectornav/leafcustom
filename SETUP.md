@@ -42,5 +42,3 @@ sudo ./scripts/bootstrap.sh
 Notas y recomendaciones
 - Revise `docker compose` vs `docker-compose` según su sistema; los scripts usan `docker compose` por defecto.
 - No exponga este servidor en Internet sin medidas de seguridad (HTTPS, firewall, sandbox de compilados, SMTP configurado).
-
-Si necesita soporte para otra distribución (RHEL/CentOS/Fedora), pídemelo y adapto los scripts.

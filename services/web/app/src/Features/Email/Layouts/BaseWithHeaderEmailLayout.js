@@ -14,7 +14,7 @@ module.exports = _.template(`\
 
 .force-overleaf-style a,
 .force-overleaf-style a[href] {
-	color: #138A07 !important;
+	color: #ff8c1a !important;
 	text-decoration: none !important;
 	-moz-hyphens: none;
 	-ms-hyphens: none;
@@ -22,7 +22,7 @@ module.exports = _.template(`\
 	hyphens: none; }
 	.force-overleaf-style a:visited,
 	.force-overleaf-style a[href]:visited {
-		color: #138A07; }
+		color: #ff8c1a; }
 	.force-overleaf-style a:hover,
 	.force-overleaf-style a[href]:hover {
 		color: #3d7935; }

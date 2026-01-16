@@ -21,9 +21,11 @@ services:
             ########################################################################
             # Mount Docker socket so CLSI / sibling containers can run builds.
             - /var/run/docker.sock:/var/run/docker.sock
+            # Favicon personalizado - coloca tu favicon.ico en la raíz del proyecto
+            - ./favicon.ico:/overleaf/services/web/public/favicon.ico:ro
         environment:
 
-            OVERLEAF_APP_NAME: Overleaf Community Edition
+            OVERLEAF_APP_NAME: LeafCustom Edition
 
             OVERLEAF_MONGO_URL: mongodb://mongo/sharelatex
 
@@ -46,7 +48,16 @@ services:
             # OVERLEAF_SITE_URL: http://overleaf.example.com
             # OVERLEAF_NAV_TITLE: Overleaf Community Edition
             # OVERLEAF_HEADER_IMAGE_URL: http://example.com/mylogo.png
-            # OVERLEAF_ADMIN_EMAIL: support@it.com
+            
+            # Admin email (cambia el placeholder del login)
+            ADMIN_EMAIL: h.navarrobarboza@gmail.com
+            
+            # CSS personalizado - Cambiar verde por naranja (mantener negro)
+            OVERLEAF_HEADER_EXTRAS: '[{"text": "<style>:root{--green-10:#fff3e6;--green-20:#ffd9b3;--green-30:#ffbf80;--green-40:#ffa64d;--green-50:#ff8c1a;--green-60:#e67300;--green-70:#b35900;--green-bright:#ff8c1a}</style>"}]'
+            
+            # Permitir acceso público y registro (NO RECOMENDADO en producción)
+            # Descomenta la siguiente línea para permitir que cualquiera se registre
+            # OVERLEAF_ALLOW_PUBLIC_ACCESS: 'true'
 
             # OVERLEAF_LEFT_FOOTER: '[{"text": "Another page I want to link to can be found <a href=\"here\">here</a>"} ]'
             # OVERLEAF_RIGHT_FOOTER: '[{"text": "Hello I am on the Right"} ]'
